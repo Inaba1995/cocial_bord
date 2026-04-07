@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Главная — True Social{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/ajax.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Форма создания поста (только для авторизованных пользователей) -->
+    {% if user.is_authenticated %}
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 col-md-10">
+            <div class="card create-post-card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header text-white text-center py-4">
+                    <h5 class="mb-0 d-flex align-items-center justify-content-center">
+                <i class="bi bi-chat-dots-fill me-2 fs-4"></i>
+                <span>Что у вас нового?</span>
+            </h5>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-white">
+            <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Текстовое поле -->
+                <div class="mb-4">
+            <label for="post-text" class="form-label fw-semibold fs-5 text-primary">Текст поста</label>
+            <textarea name="text"
+                      class="form-control form-control-lg border-primary"
+                      id="post-text"
+                      rows="4"
+                      placeholder="Поделитесь своими мыслями, новостями или идеями..."
+              style="resize: none; border-radius: 16px; min-height: 140px; border-width: 2px;"></textarea>
+        </div>
+
+        <!-- Поле загрузки изображения -->
+        <div class="mb-4">
+            <label for="image-upload" class="form-label fw-semibold text-primary">Добавить изображение</label>
+            <input type="file"
+                   name="image"
+                   id="image-upload"
+                   class="form-control border-primary"
+                   accept="image/*"
+                   style="border-radius: 12px; border-width: 2px;">
+            <small class="form-text text-muted mt-2 d-block">Поддерживаются форматы: JPG, PNG, GIF. Максимальный размер: 5 МБ</small>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="d-flex gap-3 justify-content-end">
+            <button type="reset" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">
+                <i class="bi bi-eraser me-2"></i>Очистить
+            </button>
+            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill">
+                <i class="bi bi-send-fill me-2"></i>Опубликовать
+            </button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+{% endif %}
+
+<!-- Лента постов -->
+<div class="row g-4">
+    {% for post in page_obj %}
+    <div class="col-12 col-md-8 offset-md-2">
+        <article class="post-card card shadow-sm border-0 rounded-4 hover-shadow" data-post-id="{{ post.id }}">
+            <div class="card-header bg-white border-0 p-3 p-md-4 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                <div class="author-info d-flex align-items-center gap-3">
+                    <!-- Аватар автора -->
+            <div class="avatar rounded-circle bg-gradient text-white d-flex align-items-center justify-content-center"
+                 style="width: 52px; height: 52px; font-size: 1.3rem; font-weight: bold; background: linear-gradient(45deg, #ff6b6b, #4ecdc4);">
+                {{ post.author.username|slice:":1"|upper }}
+            </div>
+            <div>
+                <h6 class="mb-0">
+            <a href="{% url 'profile' post.author.id %}" class="text-decoration-none text-dark fw-semibold">
+                {{ post.author.username }}
+            </a>
+        </h6>
+        <small class="text-muted d-block">{{ post.created_at|date:"d.m.Y H:i" }}</small>
+    </div>
+</div>
+
+<!-- Кнопки редактирования и удаления (только для автора поста) -->
+{% if post.author == user %}
+    <div class="post-actions d-flex gap-2">
+        <!-- Кнопка редактирования -->
+        <a href="{% url 'edit_post' post.id %}"
+           class="btn btn-sm btn-outline-warning rounded-pill px-3 py-2 d-flex align-items-center gap-1"
+           title="Редактировать пост">
+            <i class="bi bi-pencil"></i>
+            <span class="d-none d-sm-inline">Редактировать</span>
+        </a>
+
+        <!-- Форма удаления -->
+        <form method="post" action="{% url 'delete_post' post.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1"
+                    onclick="return confirm('Вы уверены, что хотите удалить этот пост?')">
+                <i class="bi bi-trash"></i>
+                <span class="d-none d-sm-inline">Удалить</span>
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+</div>
+
+<div class="card-body p-3 p-md-4">
+    <!-- Текст поста -->
+    {% if post.text %}
+        <div class="post-content mb-3">
+            <p class="card-text fs-5">{{ post.text }}</p>
+        </div>
+    {% endif %}
+
+    <!-- Изображение поста -->
+    {% if post.image %}
+        <div class="post-image mb-3">
+            <img src="{{ post.image.url }}"
+                 class="img-fluid rounded-3 w-100"
+                 alt="Post image"
+                 style="max-height: 500px; object-fit: cover; width: 100%;">
+        </div>
+    {% endif %}
+
+    <!-- Лайки -->
+    <div class="post-footer d-flex justify-content-between align-items-center pt-3 border-top border-light">
+        <!-- Лайки -->
+        <button class="btn-like btn btn-outline-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2"
+                data-post-id="{{ post.id }}">
+            <i class="bi {% if post.has_liked %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+            <span class="like-count">{{ post.likes_count }}</span>
+            <span>Нравится</span>
+        </button>
+
+        <!-- Количество лайков -->
+        <span class="likes-count text-muted small d-none d-md-inline">
+            {{ post.likes_count }} {{ post.likes_count|pluralize:"лайк,лайка,лайков" }}
+        </span>
+    </div>
+
+    <!-- Комментарии -->
+    <!-- Форма добавления комментария -->
+    {% if user.is_authenticated %}
+        <div class="comment-form mt-4">
+            <form method="post" class="d-flex flex-column flex-md-row gap-3 align-items-start" onsubmit="handleCommentSubmit(event, {{ post.id }})">
+                {% csrf_token %}
+                <div class="flex-grow-1 w-100">
+                    <textarea name="text"
+                      class="form-control comment-textarea w-100"
+                      placeholder="Напишите комментарий..."
+              rows="1"
+              style="resize: none; border-radius: 12px; min-height: 44px; border-width: 2px; border-color: #e9ecef;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 align-self-start align-self-md-stretch">
+                    Отправить
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <p class="text-muted mt-4 text-center">
+            <a href="{% url 'login' %}" class="text-decoration-none text-primary fw-semibold">Войдите</a>, чтобы оставлять комментарии
+        </p>
+    {% endif %}
+
+    <!-- Отображение комментариев -->
+    {% if post.comments.exists %}
+        <div class="comments mt-4 border-top pt-3">
+            <h6 class="mb-3 d-flex align-items-center text-primary">
+                <i class="bi bi-chat-left-text me-2 fs-5"></i>
+                <span>Комментарии ({{ post.comments.count }}):</span>
+            </h6>
+            {% for comment in post.comments.all %}
+                <div class="comment mb-3 p-3 bg-white border rounded-3 shadow-sm" data-comment-id="{{ comment.id }}">
+                    <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <strong class="text-dark">{{ comment.author.username }}</strong>
+            {% if comment.author == user %}
+                <span class="badge bg-primary ms-2">Вы</span>
+            {% endif %}
+            </div>
+            <small class="text-muted">{{ comment.created_at|timesince }} назад</small>
+            </div>
+            <p class="mb-0 mt-2 text-dark">{{ comment.text }}</p>
+            {% if comment.author == user or user.is_staff %}
+                <div class="text-end mt-2">
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1"
+                    onclick="confirmDeleteComment({{ comment.id }}, {{ post.id }})">
+                <i class="bi bi-trash me-1"></i>Удалить
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+    <div class="comments mt-4 text-muted text-center py-3 bg-light rounded-3">
+        <i class="bi bi-chat-dots fs-4 text-secondary mb-2"></i>
+        <p class="mb-0">Пока нет комментариев. Будьте первым!</p>
+    </div>
+{% endif %}
+</div>
+</article>
+{% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-5">
+    <ul class="pagination justify-content-center flex-wrap gap-2">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link rounded-pill px-4 py-2 bg-white text-primary border border-primary" href="?page={{ page_obj.previous_page_number }}">
+                    <i class="bi bi-arrow-left me-2"></i>Предыдущая
+        </a>
+    </li>
+{% else %}
+    <li class="page-item disabled">
+        <span class="page-link rounded-pill px-4 py-2 bg-light text-muted">
+            <i class="bi bi-arrow-left me-2"></i>Предыдущая
+        </span>
+    </li>
+{% endif %}
+
+    <li class="page-item active">
+        <span class="page-link rounded-pill px-4 py-2 bg-primary text-white">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+        </span>
+    </li>
+
+    {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link rounded-pill px-4 py-2 bg-white text-primary border border-primary" href="?page={{ page_obj.next_page_number }}">
+                Следующая<i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </li>
+    {% else %}
+        <li class="page-item disabled">
+            <span class="page-link rounded-pill px-4 py-2 bg-light text-muted">
+                Следующая<i class="bi bi-arrow-right ms-2"></i>
+            </span>
+        </li>
+    {% endif %}
+</ul>
+</nav>
+{% endif %}
+</div>
+{% endblock %}

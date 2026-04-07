@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — True Social{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient text-white text-center py-4">
+                    <i class="bi bi-box-arrow-in-right fs-2 mb-2"></i>
+                    <h4 class="mb-0">Вход в аккаунт</h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <!-- Форма входа -->
+                    <form method="post">
+                {% csrf_token %}
+
+                <!-- Поле для имени пользователя -->
+                <div class="mb-4">
+                    <label for="id_username" class="form-label fw-semibold">Имя пользователя</label>
+            <input type="text"
+                   name="username"
+                   id="id_username"
+                   class="form-control form-control-lg rounded-pill px-4"
+                   placeholder="Введите ваше имя пользователя"
+                   required
+                   autocomplete="username">
+            <div class="form-text text-muted">Используйте имя, указанное при регистрации</div>
+        </div>
+
+        <!-- Поле для пароля -->
+        <div class="mb-4">
+            <label for="id_password" class="form-label fw-semibold">Пароль</label>
+            <input type="password"
+                   name="password"
+                   id="id_password"
+                   class="form-control form-control-lg rounded-pill px-4"
+                   placeholder="Введите ваш пароль"
+                   required
+                   autocomplete="current-password">
+            <div class="form-text text-muted">Минимум 8 символов</div>
+        </div>
+
+        <!-- Кнопка входа -->
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+            </button>
+        </div>
+    </form>
+
+    <!-- Ссылки для регистрации и восстановления пароля -->
+    <div class="text-center mt-5 pt-4 border-top border-light">
+        <p class="mb-3 text-muted">Нет аккаунта?</p>
+        <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+            <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+        </a>
+
+        <div class="mt-4">
+            <a href="#" class="text-primary text-decoration-none small">
+                <i class="bi bi-lock me-1"></i>Забыли пароль?
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

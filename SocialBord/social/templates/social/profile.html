@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль {{ profile_user.username }} — True Social{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Информация о пользователе -->
+    <div class="row mb-5 justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="profile-header bg-gradient text-white p-4 d-flex align-items-end" style="min-height: 200px;">
+                    <!-- Фоновое изображение (можно добавить через CSS) -->
+        </div>
+
+        <div class="profile-avatar-container text-center mt-n5 position-relative">
+            <div class="avatar rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mx-auto"
+                 style="width: 120px; height: 120px; font-size: 3rem; font-weight: bold;">
+                {{ profile_user.username|slice:":1"|upper }}
+            </div>
+        </div>
+
+        <div class="card-body text-center p-4 p-md-5">
+            <h1 class="card-title display-5 mb-3">{{ profile_user.username }}</h1>
+            <p class="text-muted fs-5 mb-4">Зарегистрирован: {{ profile_user.date_joined|date:"d.m.Y" }}</p>
+
+            <!-- Статистика подписок -->
+            <div class="d-flex justify-content-center gap-5 mb-4">
+                <div>
+                    <strong class="fs-4">{{ subscription_count }}</strong>
+                    <div class="text-muted small">подписок</div>
+                </div>
+                <div>
+                    <strong class="fs-4">{{ subscribed_count }}</strong>
+                    <div class="text-muted small">подписчиков</div>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="d-flex gap-2 justify-content-center mb-3">
+                {% if user.is_authenticated and user != profile_user %}
+                    {% if is_subscribed %}
+                <a href="{% url 'unsubscribe' profile_user.id %}" class="btn btn-outline-danger btn-lg rounded-pill px-4">
+                    <i class="bi bi-person-dash me-2"></i>Отписаться
+        </a>
+            {% else %}
+            <a href="{% url 'subscribe' profile_user.id %}" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="bi bi-person-plus me-2"></i>Подписаться
+            </a>
+            {% endif %}
+        {% endif %}
+
+        <!-- Для владельца профиля -->
+        {% if user == profile_user %}
+            <a href="{% url 'create_post' %}" class="btn btn-success btn-lg rounded-pill px-4">
+                <i class="bi bi-pencil me-2"></i>Новый пост
+            </a>
+        {% endif %}
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Лента постов пользователя -->
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">
+                <i class="bi bi-posts me-2 text-primary"></i>Посты пользователя
+            </h3>
+            <span class="badge bg-primary rounded-pill px-3 py-2">{{ posts|length }} постов</span>
+        </div>
+
+        {% if posts %}
+            {% for post in posts %}
+                <article class="post-card card shadow-sm border-0 rounded-4 mb-4 hover-shadow" data-post-id="{{ post.id }}">
+            <div class="card-header d-flex justify-content-between align-items-center p-3 p-md-4">
+                <small class="text-muted">{{ post.created_at|date:"d.m.Y H:i" }}</small>
+                {% if post.author == user %}
+            <div class="post-actions">
+                <a href="{% url 'edit_post' post.id %}"
+                   class="btn btn-sm btn-outline-warning rounded-pill px-3 py-2 me-2"
+                   title="Редактировать пост">
+                    <i class="bi bi-pencil-square"></i>
+        </a>
+        <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2"
+                onclick="confirmDelete({{ post.id }})"
+                title="Удалить пост">
+            <i class="bi bi-trash-fill"></i>
+        </button>
+    </div>
+{% endif %}
+</div>
+
+<div class="card-body p-3 p-md-4">
+    <!-- Текст поста -->
+    {% if post.text %}
+        <p class="card-text fs-5 mb-3">{{ post.text }}</p>
+    {% endif %}
+
+    <!-- Изображение поста -->
+    {% if post.image %}
+        <div class="post-image mb-4">
+            <img src="{{ post.image.url }}"
+                 class="img-fluid rounded-3 w-100"
+                 alt="Post image"
+                 style="max-height: 500px; object-fit: cover; border-radius: 12px;">
+        </div>
+    {% endif %}
+
+    <!-- Лайки -->
+    <div class="mb-2 d-flex align-items-center gap-2">
+        <button class="btn-like btn btn-outline-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2"
+                data-post-id="{{ post.id }}">
+            <i class="bi {% if post.has_liked %}bi-heart-fill text-danger{% else %}bi-heart{% endif %} fs-5"></i>
+            <span class="like-count">{{ post.likes_count }}</span>
+            <span>Нравится</span>
+        </button>
+        <span class="likes-count text-muted small">{{ post.likes_count }} лайков</span>
+    </div>
+</div>
+</article>
+            {% endfor %}
+        {% else %}
+            <div class="text-center p-5 bg-light rounded-4">
+                <i class="bi bi-chat-dots-fill text-muted fs-1 mb-3"></i>
+                <p class="lead mb-4">Пока нет постов</p>
+                {% if user == profile_user %}
+                    <a href="{% url 'create_post' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+                <i class="bi bi-pencil me-2"></i>Создать первый пост
+            </a>
+                {% else %}
+                    <p class="text-muted">Этот пользователь пока не опубликовал ни одного поста</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

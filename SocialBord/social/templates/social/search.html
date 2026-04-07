@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск — True Social{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- Форма поиска -->
+            <form method="get" action="{% url 'search' %}" class="mb-5">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text"
+                   name="q"
+                   class="form-control form-control-lg rounded-start-pill rounded-end-pill"
+                   placeholder="Введите запрос для поиска пользователей или постов..."
+                   value="{{ query }}"
+                   aria-label="Поиск"
+                   required
+                   autofocus>
+            <button class="btn btn-primary rounded-start-pill rounded-end-pill px-4" type="submit">
+                <i class="bi bi-search me-2"></i>Найти
+            </button>
+        </div>
+    </form>
+
+    <!-- Результаты поиска -->
+    {% if query %}
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-light border-0 py-4">
+                <h5 class="mb-0 text-primary d-flex align-items-center">
+                    <i class="bi bi-search me-2 fs-4"></i>Результаты поиска по запросу: "{{ query }}"
+        </h5>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <!-- Пользователи -->
+                {% if users %}
+                    <section class="mb-5">
+                <h6 class="border-bottom pb-3 mb-4 d-flex align-items-center">
+                    <i class="bi bi-people me-2 text-primary"></i>Пользователи
+        </h6>
+        {% for user in users %}
+            <div class="user-result d-flex justify-content-between align-items-center p-3 rounded-3 mb-2 hover-bg"
+                 style="transition: background-color 0.2s;">
+                <div>
+            <a href="{% url 'profile' user.id %}" class="text-decoration-none text-dark">
+                <strong class="fs-5">{{ user.username }}</strong>
+            </a>
+            <small class="text-muted d-block">Зарегистрирован: {{ user.date_joined|date:"d.m.Y" }}</small>
+        </div>
+        <a href="{% url 'subscribe' user.id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            Подписаться
+        </a>
+    </div>
+        {% endfor %}
+    </section>
+{% else %}
+    <div class="alert alert-info rounded-4 mb-4">
+        <i class="bi bi-info-circle me-2"></i>По запросу "{{ query }}" пользователи не найдены
+    </div>
+{% endif %}
+
+<!-- Посты -->
+{% if posts %}
+    <section>
+        <h6 class="border-top pt-3 pb-3 mt-4 mb-4 d-flex align-items-center">
+            <i class="bi bi-chat-dots me-2 text-primary"></i>Посты
+        </h6>
+        {% for post in posts %}
+            <article class="post-result card shadow-sm border-0 rounded-3 mb-3" data-post-id="{{ post.id }}">
+                <div class="card-body p-3 p-md-4">
+                    <p class="card-text fs-5 mb-3">{{ post.text|truncatechars:200 }}</p>
+            {% if post.image %}
+                <div class="post-image mb-3">
+                    <img src="{{ post.image.url }}"
+                 class="img-fluid rounded-2 w-100"
+                 alt="Post image"
+                 style="max-height: 300px; object-fit: cover;">
+        </div>
+    {% endif %}
+    <small class="text-muted">
+        Автор: <a href="{% url 'profile' post.author.id %}" class="text-decoration-none fw-semibold">{{ post.author.username }}</a>,
+        {{ post.created_at|date:"d.m.Y H:i" }}
+    </small>
+</div>
+</article>
+        {% endfor %}
+    </section>
+{% else %}
+    <div class="alert alert-warning rounded-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>По запросу "{{ query }}" посты не найдены
+    </div>
+{% endif %}
+</div>
+</div>
+{% else %}
+    <!-- Экран без поиска -->
+    <div class="text-center p-5 bg-light rounded-4">
+        <div class="search-icon mb-4">
+            <i class="bi bi-search" style="font-size: 4rem; color: #6c757d;"></i>
+        </div>
+        <h4 class="mt-3 text-primary">Поиск в True Social</h4>
+        <p class="lead text-muted mb-4">Введите имя пользователя</p>
+    </div>
+{% endif %}
+</div>
+</div>
+</div>
+{% endblock %}

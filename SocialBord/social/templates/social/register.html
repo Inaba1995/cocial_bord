@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — True Social{% endblock %}
+
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-success text-white text-center py-4">
+                    <i class="bi bi-person-plus-fill fs-1 mb-2"></i>
+                    <h4 class="mb-0">Регистрация нового аккаунта</h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <!-- Форма регистрации -->
+                    <form method="post">
+                {% csrf_token %}
+
+                <!-- Поле для имени пользователя -->
+                <div class="mb-4">
+                    <label for="id_username" class="form-label fw-semibold">Имя пользователя</label>
+            <input type="text"
+                   name="username"
+                   id="id_username"
+                   class="form-control form-control-lg rounded-pill px-4"
+                   placeholder="Придумайте имя пользователя"
+                   required
+                   autocomplete="username">
+            <div class="form-text text-muted">Используйте латинские буквы, цифры и подчёркивания</div>
+        </div>
+
+        <!-- Поле для пароля -->
+        <div class="mb-4">
+            <label for="id_password1" class="form-label fw-semibold">Пароль</label>
+            <input type="password"
+                   name="password1"
+                   id="id_password1"
+                   class="form-control form-control-lg rounded-pill px-4"
+                   placeholder="Создайте надёжный пароль"
+                   required
+                   autocomplete="new-password">
+            <div class="form-text text-muted">Минимум 8 символов, включая буквы и цифры</div>
+        </div>
+
+        <!-- Поле для подтверждения пароля -->
+        <div class="mb-4">
+            <label for="id_password2" class="form-label fw-semibold">Подтвердите пароль</label>
+            <input type="password"
+                   name="password2"
+                   id="id_password2"
+                   class="form-control form-control-lg rounded-pill px-4"
+                   placeholder="Повторите пароль"
+                   required
+                   autocomplete="new-password">
+        </div>
+
+        <!-- Кнопка регистрации -->
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm">
+                <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+            </button>
+        </div>
+    </form>
+
+    <!-- Ссылки для навигации -->
+    <div class="text-center mt-5 pt-4 border-top border-light">
+        <p class="mb-3 text-muted">Уже есть аккаунт?</p>
+        <a href="{% url 'login' %}" class="btn btn-outline-success btn-lg rounded-pill px-5">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Войти в систему
+        </a>
+    </div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
