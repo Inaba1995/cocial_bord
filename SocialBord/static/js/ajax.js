@@ -59,8 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Дополнительно: обновляем состояние кнопок при загрузке страницы
     document.querySelectorAll('.btn-like').forEach(button => {
         const postId = button.dataset.postId
-        // Здесь можно добавить логику для установки начального состояния кнопки
-        // Например, если в шаблоне передаётся has_liked
+        
     })
 })
 
