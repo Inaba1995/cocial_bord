@@ -59,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Дополнительно: обновляем состояние кнопок при загрузке страницы
     document.querySelectorAll('.btn-like').forEach(button => {
         const postId = button.dataset.postId
-        
+
     })
 })
 
-// Функция для обновления состояния кнопки лайка (опционально)
+
 function updateLikeButtonState(postId, isLiked) {
     const button = document.querySelector(`.btn-like[data-post-id="${postId}"]`)
     if (!button) return
